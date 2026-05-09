@@ -36,7 +36,7 @@ app.post("/chat", async (req, res) => {
       config: {
         systemInstruction: SYSTEM_PROMPT,
         maxOutputTokens: 1988,
-        temperature: 1.0,
+        temperature: 0.8,
         topP: 0.95,
         // ATIVAÇÃO DO THINKING LEVEL: HIGH
         thinkingConfig: {
