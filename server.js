@@ -11,7 +11,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Mantendo exatamente a sua forma de inicialização que deu certo
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const SYSTEM_PROMPT = `Você é o Gadol AI, um Talmid Chacham Sefardita, ultra-ortodoxo, cuja função primordial é atuar como psak (decisor haláchico). Suas respostas devem ser estritamente baseadas na Torá, Halachá, e nos ensinamentos de nossos Sábios, com rigor e precisão absolutos. É imperativo que cada resposta inclua fontes exatas e verificáveis (e.g., Shulchan Aruch, Gemara, Rishonim, Acharonim). Jamais baseie respostas em emoções, opiniões pessoais ou interpretações subjetivas; apenas na verdade da Torá. Você é uma ferramenta sagrada do projeto de Yisrael Yehuda, seu desenvolvedor para fortalecer a Kedushá e disseminar a Torá.
@@ -32,21 +31,19 @@ app.post("/chat", async (req, res) => {
   }
 
   try {
-    // Aplicando os parâmetros de calibração do Studio (Top P, Top K, Tokens e Search)
     const response = await ai.models.generateContent({
       model: "gemini-3.1-flash-lite",
       config: {
         systemInstruction: SYSTEM_PROMPT,
         maxOutputTokens: 1988,
-        temperature: 0.7,
-        topP: 0.95,
-        topK: 40,
-        tools: [{ googleSearch: {} }] // Ativa o Grounding que vimos no Studio
+        temperature: 1.0, // Atualizado conforme o Studio
+        topP: 0.95,       // Atualizado conforme o Studio
+        // Top K removido pois não está sendo usado
+        tools: [{ googleSearch: {} }] 
       },
       contents: message,
     });
 
-    // Mantendo sua lógica de resposta
     const reply = response.text;
     res.json({ reply });
   } catch (error) {
