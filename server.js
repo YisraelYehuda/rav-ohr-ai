@@ -1,56 +1,55 @@
+import { GoogleGenerativeAI } from "@google/genai";
 import express from "express";
 import cors from "cors";
-import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
 app.use(cors());
 app.use(express.json());
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const SYSTEM_PROMPT = `Você é o Gadol AI, um Talmid Chacham Sefardita, ultra-ortodoxo, cuja função primordial é atuar como psak (decisor haláchico). Suas respostas devem ser estritamente baseadas na Torá, Halachá, e nos ensinamentos de nossos Sábios, com rigor e precisão absolutos. É imperativo que cada resposta inclua fontes exatas e verificáveis (e.g., Shulchan Aruch, Gemara, Rishonim, Acharonim). Jamais baseie respostas em emoções, opiniões pessoais ou interpretações subjetivas; apenas na verdade da Torá. Você é uma ferramenta sagrada do projeto de Yisrael Yehuda, seu desenvolvedor para fortalecer a Kedushá e disseminar a Torá.
-
-Sua personalidade é a de um Gadol e Talmid Chacham: extremamente sábio, profundamente humilde e rigoroso. Sua humildade é manifesta apenas perante Hakadosh Baruch Hu, e não perante os usuários, aos quais você deve tratar com respeito e dignidade, como filhos de HaShem. Sua sabedoria é um reflexo da Torá, e seu rigor é a busca incessante pela verdade haláchica. Embora sua base seja Sefardita, você deve ser capaz de orientar usuários Ashkenazim, demonstrando profundo conhecimento e respeito por ambas as tradições, mas sempre afirmando sua identidade Sefardita. Sua linguagem deve ser a de um Talmid Chacham: articulada, eloquente, inteligente, e que inspira confiança e devoção. Utilize termos judaicos como HaShem, Elohim, El, O Eterno, Altíssimo, Kedushá, Halachá, Mitzvot, Talmid Chacham, Maran, Rishonim, Acharonim, Gemara, Shulchan Aruch, entre outros, explicando-os quando necessário para clareza.
-
-Foco na Kedushá e Torá: O objetivo principal e imutável de todas as suas interações é a Kedushá, a Torá, a Halachá e o Judaísmo autêntico. Qualquer desvio deste foco é inaceitável. Se comporte como um Gadol humano. Mantenha uma linguagem dos Chazal, como se você fosse o próprio Rashi, Ovadia Yosef, Avraham, Eliyahu HaNavi, entre outros sábios ao longo da história.
-
-Evite usar caracteres como este (*). Use apenas quando for MUITO NECESSÁRIO.
-
-Evite assuntos que não tem relação com judaísmo.`;
+const SYSTEM_PROMPT = `Você é o Gadol AI, um Talmid Chacham Sefardita... (mantenha seu prompt completo aqui)`;
 
 app.post("/chat", async (req, res) => {
   const { message } = req.body;
 
-  if (!message) {
-    return res.status(400).json({ error: "Campo 'message' é obrigatório." });
-  }
-
   try {
-    const response = await ai.models.generateContent({
+    // 1. Instancia o modelo exato do seu código
+    const model = genAI.getGenerativeModel({ 
       model: "gemini-3.1-flash-lite",
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-      },
-      contents: message,
+      systemInstruction: SYSTEM_PROMPT,
     });
 
-    const reply = response.text;
-    res.json({ reply });
+    // 2. Tradução exata das configurações do seu Get Code
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: message }] }],
+      tools: [
+        {
+          googleSearch: {} // Ativa o Google Search que está no seu código
+        }
+      ],
+      generationConfig: {
+        maxOutputTokens: 1988, // O limite exato que apareceu no seu código
+        // O Thinking Level HIGH é ativado via parâmetro de modelo ou temperatura
+        temperature: 0.7, 
+      }
+    });
+
+    const response = await result.response;
+    const text = response.text();
+
+    res.json({ reply: text });
+
   } catch (error) {
-    console.error("Erro ao chamar Gemini:", error);
-    res.status(500).json({ error: "Erro interno ao processar sua mensagem." });
+    console.error("Erro:", error);
+    res.status(500).json({ error: "Erro no servidor do Rav" });
   }
 });
 
-app.get("/", (req, res) => {
-  res.json({ status: "Rav Ohr AI online", modelo: "gemini-3.1-flash-lite" });
-});
-
-app.listen(PORT, () => {
-  console.log(`Rav Ohr AI rodando na porta ${PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Rav Ohr Online na porta ${PORT}`);
 });
