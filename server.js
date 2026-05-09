@@ -36,9 +36,13 @@ app.post("/chat", async (req, res) => {
       config: {
         systemInstruction: SYSTEM_PROMPT,
         maxOutputTokens: 1988,
-        temperature: 1.0, // Atualizado conforme o Studio
-        topP: 0.95,       // Atualizado conforme o Studio
-        // Top K removido pois não está sendo usado
+        temperature: 1.0,
+        topP: 0.95,
+        // ATIVAÇÃO DO THINKING LEVEL: HIGH
+        thinkingConfig: {
+          includeThoughts: true,
+          thinkingBudgetTokens: 1024 
+        },
         tools: [{ googleSearch: {} }] 
       },
       contents: message,
