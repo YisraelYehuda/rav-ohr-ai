@@ -35,7 +35,7 @@ app.post("/chat", async (req, res) => {
       model: "gemini-3.1-flash-lite",
       config: {
         systemInstruction: SYSTEM_PROMPT,
-        maxOutputTokens: 1088,
+        maxOutputTokens: 800,
         temperature: 0.7,
         topP: 0.95,
         // ATIVAÇÃO DO THINKING LEVEL: HIGH
